@@ -41,6 +41,8 @@ async function run() {
       await client.connect();
       const productData = client.db('troyalelectro').collection('products');
       const reviewData = client.db('troyalelectro').collection('review');
+      const userData = client.db('troyalelectro').collection('users');
+      const orderData = client.db('troyalelectro').collection('order');
       console.log('db connected');
       //product display
       app.get('/products', async(req, res) =>{
@@ -49,12 +51,28 @@ async function run() {
         const product = await cursor.toArray();
         res.send(product);
     });
+      app.get('/order', async(req, res) =>{
+        const query = {};
+        const cursor = orderData.find(query);
+        const order = await cursor.toArray();
+        res.send(order);
+    });
       app.get('/review', async(req, res) =>{
         const query = {};
         const cursor = reviewData.find(query);
         const review = await cursor.toArray();
         res.send(review);
     });
+    app.get('/users',  async (req, res) => {
+      const users = await userData.find().toArray();
+      res.send(users);
+    });
+    app.get('/products/:id', async(req, res) =>{
+      const id = req.params.id;
+      const query = {_id: ObjectId(id)};
+      const result = await productData.findOne(query);
+      res.send(result);
+  });
     
 
     app.post('/products',  async (req, res) => {
@@ -62,10 +80,27 @@ async function run() {
       const result = await productData.insertOne(Productdata);
       res.send(result);
     });
+    app.post('/order',  async (req, res) => {
+      const orderdata = req.body;
+      const result = await orderData.insertOne(orderdata);
+      res.send(result);
+    });
     app.post('/review',  async (req, res) => {
       const reviewtdata = req.body;
       const result = await reviewData.insertOne(reviewtdata);
       res.send(result);
+    });
+    app.put('/users/:email', async (req, res) => {
+      const email = req.params.email;
+      const user = req.body;
+      const filter = { email: email };
+      const options = { upsert: true };
+      const updateDoc = {
+        $set: user,
+      };
+      const result = await userData.updateOne(filter, updateDoc, options);
+      const token = jwt.sign({ email: email }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '12h' })
+      res.send({ result, token });
     });
     
       
