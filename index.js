@@ -85,11 +85,13 @@ async function run() {
       const result = await orderData.insertOne(orderdata);
       res.send(result);
     });
+
+
     app.get('/order',  async (req, res) => {
       const email = req.query.patient;
       const decodedEmail = req.decoded.email;
-      if (patient === decodedEmail) {
-        const query = { patient: patient };
+      if (email === decodedEmail) {
+        const query = { email: email };
         const bookings = await bookingCollection.find(query).toArray();
         return res.send(bookings);
       }
@@ -97,6 +99,7 @@ async function run() {
         return res.status(403).send({ message: 'forbidden access' });
       }
     });
+
     app.post('/review',  async (req, res) => {
       const reviewtdata = req.body;
       const result = await reviewData.insertOne(reviewtdata);
@@ -115,7 +118,8 @@ async function run() {
       res.send({ result, token });
     });
     
-      // new line add
+  
+    }
     finally{
 
     }
