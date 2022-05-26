@@ -131,5 +131,5 @@ app.get("/", (req, res) => {
   });
 
 app.listen(port, () => {
-  console.log("uniMart server Running at Port : ", port);
+  console.log("Trayal server Running at Port : ", port);
 });
