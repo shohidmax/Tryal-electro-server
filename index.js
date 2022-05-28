@@ -65,7 +65,7 @@ async function run() {
 
       // connot create send grid account
       //product display
-    app.get('/products',  verifyJWT, async(req, res) =>{
+    app.get('/products',  async(req, res) =>{
         const query = {};
         const cursor = productData.find(query);
         const product = await cursor.toArray();
