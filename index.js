@@ -203,6 +203,15 @@ async function run() {
       const updatedorder = await orderData.updateOne(filter, updatedDoc);
       res.send(updatedorder);
     })
+    app.get('/users1/:email', async (req, res) => {
+      const email = req.params.email;
+      console.log(email);
+      const filter = { email: email };
+     
+      const result = await userData.findOne(filter);
+      res.send(result);
+    });
+
     
 
     app.put('/users1/:email', async (req, res) => {
