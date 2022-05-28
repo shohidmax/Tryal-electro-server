@@ -200,7 +200,7 @@ async function run() {
       const orders = await orderData.findOne(query);
       res.send(orders);
     })
-    // delete a product
+    // delete a order
     app.delete('/orders/:id', async(req, res) =>{
       const id = req.params.id;
       const query = {_id: ObjectId(id)};
@@ -213,7 +213,7 @@ async function run() {
       const result = await orderData.deleteOne(query);
       res.send(result);
    })
-    // delete a product
+    // delete a products
     app.delete('/products/:id', async(req, res) =>{
       const id = req.params.id;
       const query = {_id: ObjectId(id)};
