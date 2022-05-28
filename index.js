@@ -17,9 +17,6 @@ const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology:
 
 function verifyJWT(req, res, next) {
   const authHeader = req.headers.authorization;
-  console.log('author', authHeader);
-
-  
   if (!authHeader) {
     return res.status(401).send({ message: 'UnAuthorized access' });
   }
@@ -29,7 +26,6 @@ function verifyJWT(req, res, next) {
       return res.status(403).send({ message: 'Forbidden access' })
     }
     req.decoded = decoded;
-    console.log('requst decoded', req.decoded);
     next();
   });
 }
@@ -46,9 +42,6 @@ async function run() {
       const userData = client.db('troyalelectro').collection('users');
       const orderData = client.db('troyalelectro').collection('order');
       const paymentData = client.db('troyalelectro').collection('payment');
-      console.log('db connected');
-
-
       const verifyAdmin = async (req, res, next) => {
         const requester = req.decoded.email;
         const requesterAccount = await userCollection.findOne({ email: requester });
@@ -59,10 +52,6 @@ async function run() {
           res.status(403).send({ message: 'forbidden' });
         }
       }
-
-
-
-
       // connot create send grid account
       //product display
     app.get('/products',  async(req, res) =>{
@@ -82,21 +71,9 @@ async function run() {
 
     app.get('/order',  verifyJWT, async (req, res) => {
       const email = req.query.email;
-      console.log( 'order', email);
       const query = { email : email };
       const order = await orderData.find(query).toArray();
       return res.send(order);
-      
-      // const decodedEmail = req.decoded.Email; 
-
-      // if (email === decodedEmail) {
-      //   const query = { email : email };
-      //   const order = await orderData.find(query).toArray();
-      //   return res.send(order);
-      // }
-      // else {
-      //   return res.status(403).send({ message: 'forbidden access' });
-      // }
     });
 
     app.post('/create-payment-intent', verifyJWT, async(req, res) =>{
@@ -205,7 +182,6 @@ async function run() {
     })
     app.get('/users1/:email', async (req, res) => {
       const email = req.params.email;
-      console.log(email);
       const filter = { email: email };
      
       const result = await userData.findOne(filter);
@@ -217,7 +193,6 @@ async function run() {
     app.put('/users1/:email', async (req, res) => {
       const currentUser = req.body;
       const email = req.params.email;
-      console.log(email);
       const filter = { email: email };
       const options = { upsert: true };
       const updateDoc = {
