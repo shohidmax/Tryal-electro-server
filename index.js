@@ -3,8 +3,6 @@ const cors = require('cors');
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
-// var nodemailer = require('nodemailer');
-// var sgTransport = require('nodemailer-sendgrid-transport');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 const app = express();
@@ -41,17 +39,19 @@ function verifyJWT(req, res, next) {
 
 
 async function run() {
-    try{
+  try{
       await client.connect();
       const productData = client.db('troyalelectro').collection('products');
       const reviewData = client.db('troyalelectro').collection('review');
       const userData = client.db('troyalelectro').collection('users');
       const orderData = client.db('troyalelectro').collection('order');
-      const adminData = client.db('troyalelectro').collection('admin');
+      const paymentData = client.db('troyalelectro').collection('payment');
       console.log('db connected');
+
+
       const verifyAdmin = async (req, res, next) => {
         const requester = req.decoded.email;
-        const requesterAccount = await userData.findOne({ email: requester });
+        const requesterAccount = await userCollection.findOne({ email: requester });
         if (requesterAccount.role === 'admin') {
           next();
         }
@@ -65,7 +65,7 @@ async function run() {
 
 
       //product display
-      app.get('/products', async(req, res) =>{
+    app.get('/products', async(req, res) =>{
         const query = {};
         const cursor = productData.find(query);
         const product = await cursor.toArray();
@@ -77,7 +77,7 @@ async function run() {
       const cursor = orderData.find(query);
       const order = await cursor.toArray();
       res.send(order);
-  });
+   });
 
 
     app.get('/order',  verifyJWT, async (req, res) => {
@@ -87,8 +87,7 @@ async function run() {
       const order = await orderData.find(query).toArray();
       return res.send(order);
       
-      // const decodedEmail = req.decoded.Email;
-      // console.log( 'order', decodedEmail);
+      // const decodedEmail = req.decoded.Email; 
 
       // if (email === decodedEmail) {
       //   const query = { email : email };
@@ -99,9 +98,21 @@ async function run() {
       //   return res.status(403).send({ message: 'forbidden access' });
       // }
     });
+
+    app.post('/create-payment-intent', verifyJWT, async(req, res) =>{
+      const service = req.body;
+      const price = service.payprice;
+      const amount = price*100;
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount : amount,
+        currency: 'usd',
+        payment_method_types:['card']
+      });
+      res.send({clientSecret: paymentIntent.client_secret})
+    });
     
       
-      app.get('/review', async(req, res) =>{
+    app.get('/review', async(req, res) =>{
         const query = {};
         const cursor = reviewData.find(query);
         const review = await cursor.toArray();
@@ -116,8 +127,14 @@ async function run() {
       const query = {_id: ObjectId(id)};
       const result = await productData.findOne(query);
       res.send(result);
-  });
+   });
     
+   app.get('/order/:id',  async(req, res) =>{
+     const id = req.params.id;
+     const query = {_id: ObjectId(id)};
+     const booking = await orderData.findOne(query);
+     res.send(booking);
+    })
 
     app.post('/products',  async (req, res) => {
       const Productdata = req.body;
@@ -129,6 +146,13 @@ async function run() {
       const result = await orderData.insertOne(orderdata);
       res.send(result);
     });
+    
+    app.get('/admin/:email', async (req, res) => {
+      const email = req.params.email;
+      const user = await userData.findOne({ email: email });
+      const isAdmin = user.role === 'admin';
+      res.send({ admin: isAdmin })
+    })
 
     app.put('/users/admin/:email', verifyJWT, async (req, res) => {
       const email = req.params.email;
@@ -149,6 +173,22 @@ async function run() {
       res.send(result);
     })
 
+    app.patch('/order/:id', verifyJWT, async(req, res) =>{
+      const id  = req.params.id;
+      const payment = req.body;
+      const filter = {_id: ObjectId(id)};
+      const updatedDoc = {
+        $set: {
+          paid: true,
+          transactionId: payment.transactionId
+        }
+      }
+      const result = await paymentData.insertOne(payment);
+      const updatedorder = await orderData.updateOne(filter, updatedDoc);
+      res.send(updatedorder);
+    })
+
+
 
     
 
@@ -166,20 +206,27 @@ async function run() {
       const query = {_id: ObjectId(id)};
       const result = await orderData.deleteOne(query);
       res.send(result);
-  })
+   })
+    app.delete('/order/:id', async(req, res) =>{
+      const id = req.params.id;
+      const query = {_id: ObjectId(id)};
+      const result = await orderData.deleteOne(query);
+      res.send(result);
+   })
     // delete a product
     app.delete('/products/:id', async(req, res) =>{
       const id = req.params.id;
       const query = {_id: ObjectId(id)};
       const result = await productData.deleteOne(query);
       res.send(result);
-  })
+   })
 
     app.post('/review',  async (req, res) => {
       const reviewtdata = req.body;
       const result = await reviewData.insertOne(reviewtdata);
       res.send(result);
     });
+
     app.put('/users/:email', async (req, res) => {
       const email = req.params.email;
       const user = req.body;
