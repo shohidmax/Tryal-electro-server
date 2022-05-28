@@ -188,8 +188,7 @@ async function run() {
       res.send(result);
     });
 
-
-
+    
     app.put('/users1/:email', async (req, res) => {
       const currentUser = req.body;
       const email = req.params.email;
