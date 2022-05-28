@@ -153,6 +153,11 @@ async function run() {
       const isAdmin = user.role === 'admin';
       res.send({ admin: isAdmin })
     })
+    app.get('/user1/:email', async (req, res) => {
+      const email = req.params.email;
+      const user = await userData.findOne({ email: email });
+      res.send(user)
+    })
 
     app.put('/users/admin/:email', verifyJWT, async (req, res) => {
       const email = req.params.email;
@@ -187,20 +192,37 @@ async function run() {
       const updatedorder = await orderData.updateOne(filter, updatedDoc);
       res.send(updatedorder);
     })
-    // updating new data
-    // app.patch('/orderp/:id', verifyJWT, async(req, res) =>{
-    //   const id  = req.params.id;
-    //   const status = req.body;
-    //   const filter = {_id: ObjectId(id)};
-    //   const updatedDoc = {
-    //     $set: {
-    //       status
-    //     }
-    //   }
-    //   const result = await paymentData.insertOne(status);
-    //   const updatedorder = await orderData.updateOne(filter, updatedDoc);
-    //   res.send(updatedorder);
-    // })
+    app.put('/order/orders/:id', async(req, res) =>{
+      const id  = req.params.id;
+      const filter = {_id: ObjectId(id)};
+      const updatedDoc = {
+        $set: {
+          status: 'shipped'
+        },
+      }
+      const updatedorder = await orderData.updateOne(filter, updatedDoc);
+      res.send(updatedorder);
+    })
+    
+
+    app.put('/users1/:email', async (req, res) => {
+      const currentUser = req.body;
+      const email = req.params.email;
+      console.log(email);
+      const filter = { email: email };
+      const options = { upsert: true };
+      const updateDoc = {
+        $set: {education: currentUser.education,
+              location: currentUser.location,
+              phoneN: currentUser.socialurl,
+              address: currentUser.address,
+              socialurl: currentUser.currentUser,
+              email: email
+        },
+      };
+      const result = await userData.updateOne(filter, updateDoc, options);
+      res.send(result);
+    });
 
 
 
@@ -250,7 +272,6 @@ async function run() {
         $set: user,
       };
       const result = await userData.updateOne(filter, updateDoc, options);
-      console.log(process.env.ACCESS_TOKEN_SECRET);
       const token = jwt.sign({ email: email }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1h' })
       res.send({ result, token });
     });
