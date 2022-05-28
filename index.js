@@ -188,7 +188,7 @@ async function run() {
       res.send(result);
     });
 
-    
+
 
     app.put('/users1/:email', async (req, res) => {
       const currentUser = req.body;
@@ -198,9 +198,9 @@ async function run() {
       const updateDoc = {
         $set: {education: currentUser.education,
               location: currentUser.location,
-              phoneN: currentUser.socialurl,
+              phoneN: currentUser.phoneN,
               address: currentUser.address,
-              socialurl: currentUser.currentUser,
+              socialurl: currentUser.socialurl,
               email: email
         },
       };
