@@ -63,16 +63,16 @@ async function run() {
 
 
 
-
+      // connot create send grid account
       //product display
-    app.get('/products', async(req, res) =>{
+    app.get('/products',  verifyJWT, async(req, res) =>{
         const query = {};
         const cursor = productData.find(query);
         const product = await cursor.toArray();
         res.send(product);
     });
 
-    app.get('/orders', async(req, res) =>{
+    app.get('/orders',  verifyJWT, async(req, res) =>{
       const query = {};
       const cursor = orderData.find(query);
       const order = await cursor.toArray();
@@ -112,42 +112,42 @@ async function run() {
     });
     
       
-    app.get('/review', async(req, res) =>{
+    app.get('/review', verifyJWT, async(req, res) =>{
         const query = {};
         const cursor = reviewData.find(query);
         const review = await cursor.toArray();
         res.send(review);
     });
-    app.get('/users', async (req, res) => {
+    app.get('/users', verifyJWT, async (req, res) => {
       const users = await userData.find().toArray();
       res.send(users);
     });
-    app.get('/products/:id', async(req, res) =>{
+    app.get('/products/:id', verifyJWT,  async(req, res) =>{
       const id = req.params.id;
       const query = {_id: ObjectId(id)};
       const result = await productData.findOne(query);
       res.send(result);
    });
     
-   app.get('/order/:id',  async(req, res) =>{
+   app.get('/order/:id',   async(req, res) =>{
      const id = req.params.id;
      const query = {_id: ObjectId(id)};
      const booking = await orderData.findOne(query);
      res.send(booking);
     })
 
-    app.post('/products',  async (req, res) => {
+    app.post('/products', verifyJWT,  async (req, res) => {
       const Productdata = req.body;
       const result = await productData.insertOne(Productdata);
       res.send(result);
     });
-    app.post('/order',  async (req, res) => {
+    app.post('/order', verifyJWT,  async (req, res) => {
       const orderdata = req.body;
       const result = await orderData.insertOne(orderdata);
       res.send(result);
     });
     
-    app.get('/admin/:email', async (req, res) => {
+    app.get('/admin/:email', verifyJWT, async (req, res) => {
       const email = req.params.email;
       const user = await userData.findOne({ email: email });
       const isAdmin = user.role === 'admin';
@@ -201,27 +201,27 @@ async function run() {
       res.send(orders);
     })
     // delete a order
-    app.delete('/orders/:id', async(req, res) =>{
+    app.delete('/orders/:id', verifyJWT,  async(req, res) =>{
       const id = req.params.id;
       const query = {_id: ObjectId(id)};
       const result = await orderData.deleteOne(query);
       res.send(result);
    })
-    app.delete('/order/:id', async(req, res) =>{
+    app.delete('/order/:id', verifyJWT,  async(req, res) =>{
       const id = req.params.id;
       const query = {_id: ObjectId(id)};
       const result = await orderData.deleteOne(query);
       res.send(result);
    })
     // delete a products
-    app.delete('/products/:id', async(req, res) =>{
+    app.delete('/products/:id', verifyJWT,  async(req, res) =>{
       const id = req.params.id;
       const query = {_id: ObjectId(id)};
       const result = await productData.deleteOne(query);
       res.send(result);
    })
 
-    app.post('/review',  async (req, res) => {
+    app.post('/review', verifyJWT,   async (req, res) => {
       const reviewtdata = req.body;
       const result = await reviewData.insertOne(reviewtdata);
       res.send(result);
