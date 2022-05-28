@@ -112,7 +112,7 @@ async function run() {
     });
     
       
-    app.get('/review', verifyJWT, async(req, res) =>{
+    app.get('/review', async(req, res) =>{
         const query = {};
         const cursor = reviewData.find(query);
         const review = await cursor.toArray();
@@ -122,7 +122,7 @@ async function run() {
       const users = await userData.find().toArray();
       res.send(users);
     });
-    app.get('/products/:id', verifyJWT,  async(req, res) =>{
+    app.get('/products/:id',  async(req, res) =>{
       const id = req.params.id;
       const query = {_id: ObjectId(id)};
       const result = await productData.findOne(query);
@@ -136,7 +136,7 @@ async function run() {
      res.send(booking);
     })
 
-    app.post('/products', verifyJWT,  async (req, res) => {
+    app.post('/products',  async (req, res) => {
       const Productdata = req.body;
       const result = await productData.insertOne(Productdata);
       res.send(result);
@@ -187,6 +187,20 @@ async function run() {
       const updatedorder = await orderData.updateOne(filter, updatedDoc);
       res.send(updatedorder);
     })
+    // updating new data
+    // app.patch('/orderp/:id', verifyJWT, async(req, res) =>{
+    //   const id  = req.params.id;
+    //   const status = req.body;
+    //   const filter = {_id: ObjectId(id)};
+    //   const updatedDoc = {
+    //     $set: {
+    //       status
+    //     }
+    //   }
+    //   const result = await paymentData.insertOne(status);
+    //   const updatedorder = await orderData.updateOne(filter, updatedDoc);
+    //   res.send(updatedorder);
+    // })
 
 
 
